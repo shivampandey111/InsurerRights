@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+supabase
+langchain
+langchain-google-genai
+langchain-community
+pymupdf
+pydantic
+python-multipart
+sentry-sdk
+slowapi
+pdfplumber
