@@ -20,11 +20,27 @@ class LoginUser(BaseModel):
 
 @router.post('/register')
 async def register_user(user:RegisterUser):
+
     try:
+        already_exists = (
+        supabase.table("profiles")
+        .select('email')
+        .eq('email', user.email)
+        .execute()
+        )
+        if already_exists.data:
+            raise HTTPException(
+                status_code=400,
+                detail="User already Exists"
+        )
         response = supabase.auth.sign_up({
             "email" : user.email,
             "password" : user.password
         })
+        supabase.table("profiles").insert({
+            "id" : response.user.id,
+            "email" : user.email
+        }).execute()
         return {
             "message" : "User Created Successfully",
             "user_id" : response.user.id
@@ -50,10 +66,10 @@ async def loginUser(user:LoginUser):
             "user_id" : response.user.id,
             "message" : "User Logged In Successfully"
         }
-    except:
+    except Exception as e:
         raise HTTPException(
-            status_code=401,
-            detail="Invalid Credentials"
+            status_code=501,
+            detail= str(e)
         )
     
 # Logout
