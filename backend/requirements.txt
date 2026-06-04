@@ -1,4 +1,0 @@
-pymupdf
-python-multipart
-sentry-sdk
-slowapi
