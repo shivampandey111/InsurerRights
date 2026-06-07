@@ -11,3 +11,4 @@ python-multipart
 sentry-sdk
 slowapi
 pdfplumber
+pypdf
