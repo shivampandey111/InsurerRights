@@ -1,9 +1,10 @@
 from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
-from database import get_supabase
-from services.pdf_service import extract_content_from_pdf, get_chunks
-from services.embedding_service import get_embeds
-from routers.dependencies import get_current_user
+from backend.supaBase import get_supabase
+from backend.services.pdf_service import extract_content_from_pdf, get_chunks
+from backend.services.embedding_service import get_embeds
+from backend.routers.dependencies import get_current_user
 import uuid
+
 router = APIRouter()
 
 @router.post('/upload')
@@ -15,7 +16,7 @@ async def upload_pdf(
     if file.content_type != "application/pdf":
         raise HTTPException(400, "Only pdf files are expected")
     
-    file_bytes = await file.read()
+    file_bytes = await file.read()  # The return type is bytes
     if len(file_bytes) > 20 * 1024 * 1024:
         raise HTTPException(401, "Max file size allowed is 10mb")
 
