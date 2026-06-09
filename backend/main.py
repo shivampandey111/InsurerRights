@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, query, upload
+from backend.routers import auth, query, upload
 
 app = FastAPI(title="Insurer Rights")
 
