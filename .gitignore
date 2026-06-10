@@ -5,3 +5,8 @@ venv/
 .env
 .vscode/
 notes
+# Test file
+backend/services/testing.py
+
+# Specific PDF
+backend/scripts/Exception/Star Comprehensive Insurance Policy.pdf
