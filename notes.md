@@ -1,29 +1,29 @@
-pgvector over chroma because of empheral system and over pinecone because of not adding another service for now. 
+file_bytes: bytes
 
-## Profile table 01
+The function expects PDF data in binary form.
 
-created own users table to check whether the user already exists 
+Normally PyMuPDF opens a PDF from a file path: doc = fitz.open("sample.pdf")
 
-## PDF Extraction: Hybrid PyMuPDF + pdfplumber 31
+But in web applications like FastAPI, uploaded files are usually received as bytes in memory, not as files on disk.
 
-Initial approach: PyMuPDF page.get_text() only.
+Uploaded PDF
+      ↓
+file.read()
+      ↓
+PDF bytes
+      ↓
+fitz.open(stream=bytes)
+      ↓
+Document object
+      ↓
+Loop through pages
+      ↓
+Extract text
+      ↓
+Return text
 
-Problem: Insurance docs contain sub-limit tables, premium tables, 
-waiting period tables. Flat text extraction destroyed row-column 
-relationships — "Room Rent ₹3000/day" extracted as "Room Rent 
-₹3000/day" without header context. A query for "ICU sub-limit" 
-would retrieve correct numbers but LLM couldn't reliably associate 
-them to the right benefit.
 
-Decision: Two-pass extraction. PyMuPDF for body text (fast, reliable). 
-pdfplumber for tables (structured extraction, converted to 
-"Header: Value" readable format). Tables kept as single chunks 
-with [TABLE] prefix. Text chunked with insurance-aware separators.
-
-Trade-off: Slightly slower ingestion. pdfplumber is heavier than 
-PyMuPDF. Acceptable — ingestion is a one-time cost per document, 
-not per query.
-
+##                                                    AUTH
 This is exactly the right question to ask now. This is the core of how authenticated APIs work. Understand this pattern once and you'll use it in every backend you ever build.
 
 ---
@@ -181,26 +181,89 @@ Result: user isolation is automatic and unforgeable. The client
 cannot claim to be a different user because identity comes from 
 the signed token, not from request data.
 ```
+# Doc and doc_chunks table role
+## What document_chunks Stores Per Row
 
+```
+id | doc_id | user_id | content | embedding | visibility
+```
 
-## Auth: JWT dependency injection via Depends()
+It stores chunks. Each row knows which doc it belongs to via `doc_id`. But `doc_id` is just a UUID — `550e8400-e29b-41d4-a716`. It tells you nothing about what document that is.
 
-Instead of passing user_id as a request body field (insecure — 
-any client can send any UUID), extracted user identity from the 
-JWT access token on every protected endpoint using FastAPI's 
-Depends() system.
+---
 
-Pattern: get_current_user dependency validates token against 
-Supabase auth.get_user(), returns verified UUID. Injected into 
-upload, query, and all future protected endpoints.
+## The Problem Without documents Table
 
-Result: user isolation is automatic and unforgeable. The client 
-cannot claim to be a different user because identity comes from 
-the signed token, not from request data.
+Say a user uploads 3 policies. Your frontend needs to show:
 
+```
+Your uploaded documents:
+1. Star_Health_Comprehensive.pdf — uploaded 2 June
+2. HDFC_ERGO_Optima.pdf — uploaded 3 June  
+3. LIC_Jeevan_Anand.pdf — uploaded 4 June
+```
 
-## 03 June
-chunk 1704 on 12 mb pdf when chunk size is 800 and overlap is 200, batch size 20, requests 86, a lot. This was a stress test. 
+Without the documents table, how do you get this list? You'd have to query `document_chunks`, do a `DISTINCT doc_id` — but that gives you 3 UUIDs. No filename. No date. No way to display anything meaningful to the user.
 
-# 06 June
-Rate Limits, changed the batch size to 5 for mother docs and sleep time to 3
+You'd be forced to store filename and created_at in **every single chunk row**. If a document has 200 chunks, you're storing the same filename 200 times. That's what normalization exists to prevent.
+
+---
+
+## What documents Table Actually Does
+
+**1. Single source of truth for document metadata**
+
+```sql
+documents: filename, storage_path, chunk_count, created_at
+```
+
+Stored once per document. Not 200 times across chunks.
+
+**2. Enables clean deletion via CASCADE**
+
+```sql
+-- User deletes their policy
+DELETE FROM documents WHERE id = doc_id;
+-- All 200 chunks in document_chunks are automatically deleted
+-- because of ON DELETE CASCADE on the foreign key
+```
+
+Without documents table, to delete a document you'd have to:
+```sql
+DELETE FROM document_chunks WHERE doc_id = '550e8400...';
+-- But how does the user trigger this? They know their filename, not the UUID.
+```
+
+**3. storage_path is not redundant**
+
+If you store the original PDF in Supabase Storage (which you should — so users can re-download their policy), the path lives here. You need it if you ever want to reprocess the document, let the user download the original, or show a preview.
+
+**4. chunk_count for validation**
+
+When ingestion runs, you store how many chunks were created. If something fails mid-ingestion, chunk_count in documents vs actual rows in document_chunks tells you the ingestion was incomplete. Useful for debugging.
+
+---
+
+## The Actual Relationship
+
+```
+documents (1)  ──────────────────  document_chunks (many)
+id (PK)                            doc_id (FK → documents.id)
+filename                           content
+storage_path                       embedding
+chunk_count                        visibility
+created_at
+```
+
+documents = the file itself. document_chunks = the file broken into searchable pieces.
+
+This is standard one-to-many relational design. The parent table holds what describes the whole thing. The child table holds the individual pieces. You never want metadata about the whole document scattered across every child row.
+
+# ROOT ISSUE
+
+there's a slight problem, when running a specific file, python cannot find the module, but when doing the same in fastapi, there is no problem because it starts from root. How to fix this in python?
+
+Run as module, start from absolute root
+
+# In query.py 
+get_current_user, first async await, then depend, first it was coroutine object is not serializable and then depend is not. 
