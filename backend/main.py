@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import auth, query, upload
+from backend.routers import auth, query, upload, docs, history
 
 app = FastAPI(title="Insurer Rights")
 
@@ -13,6 +13,14 @@ app.add_middleware(
 )
 
 # Register Routes from router file
+app.include_router(
+    docs.router,
+    tags=['Docs']
+)
+app.include_router(
+    history.router,
+    tags=['History']
+)
 
 app.include_router(
     auth.router,
@@ -21,12 +29,10 @@ app.include_router(
 )
 app.include_router(
     query.router,
-    prefix='/query',
     tags=['Query']
 )
 app.include_router(
     upload.router,
-    prefix='/upload',
     tags=['Upload']
 )
 
