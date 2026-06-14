@@ -7,7 +7,8 @@ import uuid
 
 router = APIRouter()
 
-@router.post('/upload')
+
+@router.post('/api/upload')
 async def upload_pdf(
     file: UploadFile = File(...), 
     user_id = Depends(get_current_user)
@@ -17,7 +18,7 @@ async def upload_pdf(
         raise HTTPException(400, "Only pdf files are expected")
     
     file_bytes = await file.read()  # The return type is bytes
-    if len(file_bytes) > 20 * 1024 * 1024:
+    if len(file_bytes) > 15 * 1024 * 1024:
         raise HTTPException(401, "Max file size allowed is 10mb")
 
     # Extract and Chunk

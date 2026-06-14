@@ -11,7 +11,6 @@ async def get_current_user(
         supabase = Depends(get_supabase)
 ) -> str :
     token = credentials.credentials
-
     try:
         response = supabase.auth.get_user(token)
         user = response.user

@@ -25,7 +25,7 @@ def get_chat_hisory(doc_id : str, user_id : str, supabase) -> str:
     messages = list(reversed(result.data))
     return "\n".join([f"{m['role'].upper()}: {m['content']}" for m in messages])
 
-@router.post("/query")
+@router.post("/api/query")
 async def process_query(
     req: Query, 
     user_id = Depends(get_current_user)
