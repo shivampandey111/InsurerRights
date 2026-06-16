@@ -5,10 +5,10 @@ from backend.routers.dependencies import get_current_user
 router = APIRouter()
 supabase = get_supabase()
 
-@router.post('/history/{doc_id}')
+@router.get('/history/{doc_id}')
 async def get_history(
     doc_id : str,
-    user_id : str = Depends(get_current_user)
+    user_id: str = Depends(get_current_user)
 ):
     result = (
         supabase.table("chat_history")
