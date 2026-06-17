@@ -10,7 +10,7 @@ async def get_docs(
     user_Id: str = Depends(get_current_user)):
     result = (
         supabase.table('documents')
-        .select("filename", "id", "created_at")
+        .select("filename", "id", "created_at", "storage_used_mb")
         .eq('user_id', user_Id)
         .order("created_at", desc=True)
         .execute()
