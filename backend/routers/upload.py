@@ -6,7 +6,18 @@ from backend.routers.dependencies import get_current_user
 import uuid
 
 router = APIRouter()
+supabase = get_supabase()
 
+def get_storage_used(chunks: list[str]) -> float:
+    text_bytes = sum(
+        len(chunk.encode("utf-8"))
+        for chunk in chunks
+    )
+    embedding_bytes = len(chunks) * 1024 * 4
+    total_bytes = embedding_bytes + text_bytes
+    return round(
+        total_bytes / (1024*1024), 2
+    )
 
 @router.post('/api/upload')
 async def upload_pdf(
@@ -25,17 +36,42 @@ async def upload_pdf(
     text = extract_content_from_pdf(file_bytes)
     chunk = get_chunks(text)
 
+    # Get Storage Consumed 
+    estimated_storage = get_storage_used(chunk)
+    try:
+        response = (
+                supabase.table("documents")
+                .select("storage_used_mb")
+                .eq("user_id", user_id)
+                .execute()
+            )
+        current_storage = sum(
+                row["storage_used_mb"] or 0
+                for row in response.data
+            )
+        LIMIT_MB = 50
+        if estimated_storage + current_storage > LIMIT_MB:
+            print(estimated_storage)
+            print(current_storage)
+            raise HTTPException(
+                status_code=400,
+                detail="Storage Excedded"
+            )
+    except Exception as e:
+        print(type(e))
+        raise HTTPException(400, str(e))
+        
     # Get Embeddings
     embedding = get_embeds(chunk)
 
     # Store the document
-    supabase = get_supabase()
     doc_id = str(uuid.uuid4())
     supabase.table("documents").insert({
         "id" : doc_id,
         "user_id" : user_id,
         "filename" : file.filename,
-        "chunk_count" : len(chunk)
+        "chunk_count" : len(chunk),
+        "storage_used_mb" : estimated_storage
     }).execute()
 
     # Store the vectors
