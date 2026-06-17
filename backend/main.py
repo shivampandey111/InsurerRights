@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import auth, query, upload, docs, history
+from backend.routers import auth, query, upload, docs, history, globalChat
 
 app = FastAPI(title="Insurer Rights")
 
@@ -21,7 +21,10 @@ app.include_router(
     history.router,
     tags=['History']
 )
-
+app.include_router(
+    globalChat.router,
+    tags=['Global Assistant']
+)
 app.include_router(
     auth.router,
     prefix='/auth',
