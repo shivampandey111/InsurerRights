@@ -48,7 +48,6 @@ Instructions:
 5. Include only details relevant to the user's question.
 6. If there are important conditions, waiting periods, exclusions, limits, or exceptions, mention them briefly.
 7. Use this structure:
-Answer:
 <direct answer>
 
 Important Details:
