@@ -60,7 +60,6 @@ Policy Reference:
 
 8. Never mention information that is not present in the context.
 9. Keep answers under 200 words unless the user explicitly asks for detailed information.
-10. Do not use markdown bold (**).
 11. If a section contains more than one item, format it as a vertical bullet list.
 Do not write lists in paragraph form.
 
