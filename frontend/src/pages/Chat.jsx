@@ -1,0 +1,314 @@
+import axios from 'axios'
+import { useEffect, useRef, useState } from 'react';
+import useAuth from '../hooks/useAuth';
+import { useNavigate, Navigate, useParams } from 'react-router-dom';
+import DashBoard from './DashBoard'
+
+export default function Chat(){
+    const { doc_id } = useParams()
+    const [docs, setDocs] = useState([])
+    const {session, loading} = useAuth()
+    const access_token = session?.access_token
+    const [messages, setMessages] = useState([])
+    const [query, setQuery] = useState('')
+    const [isLoading, setLoading] = useState(false)
+    const [chatError, setError] = useState('')
+    const messagesEndRef = useRef(null)
+    const navigate = useNavigate()
+
+    const fetchDocument = async(event) => {
+        const response = await axios.get(
+            `${import.meta.env.VITE_API_URL}/api/documents`,
+        {
+            headers: {
+                Authorization : `Bearer ${access_token}`
+            }
+        }
+        )
+        setDocs(response.data)
+    }
+    useEffect(()=>{
+      if(loading) return
+      if(!session) return
+
+      fetchDocument()
+    }, [loading, session])
+
+    const activeDoc = docs.find(
+        (doc) => doc.id === doc_id
+    )
+    const fetchHistory = async(event) => {
+        const response = await axios.get(
+            `${import.meta.env.VITE_API_URL}/history/${doc_id}`,
+            {
+                headers : {
+                    Authorization : `Bearer ${access_token}`
+                }
+            }
+        );
+        setMessages(response.data)
+    }
+    useEffect(()=>{
+      if(loading) return
+      if(!session) return
+
+      fetchHistory()
+    }, [loading, session, doc_id])
+
+    useEffect(()=>{
+      messagesEndRef.current?.scrollIntoView({
+        behaviour : "smooth"
+      })
+    }, [messages])
+
+    const handleDocClick = (doc) => {
+      navigate(`/Chat/${doc.id}`)
+    }
+
+    const handleSend = async() => {
+      console.log("send fired")
+      if(!query.trim()){
+        return
+      }
+      setLoading(true)
+      const currentQuery = query;
+      setQuery("");
+
+      setMessages(prev => [...prev, 
+          {
+            role : "user",
+            content : currentQuery
+          },
+          {
+            role : "assistant",
+            content : ""
+          }
+      ])
+    try{
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/query`,
+        {
+          method : 'POST',
+          headers : {
+            "Content-Type" : "application/json",
+            "Authorization" : `Bearer ${access_token}`
+          },
+          body : JSON.stringify({
+            question : currentQuery,
+            doc_id : doc_id
+          })
+        }
+      )
+      const reader = response.body.getReader()
+      if(!response.ok){
+        const error = await response.json()
+        setError(error)
+        throw new Error(error.detail)
+      }
+      
+      const decoder = new TextDecoder()
+
+      while(true) {
+        const { done, value } = await reader.read()
+        if(done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n\n')
+
+        for (const line of lines){
+          if(!line.startsWith("data: ")) continue;
+          const jsonString = line.slice(6)
+          const data = JSON.parse(jsonString)
+        
+
+        if(data.token){
+          setMessages(prev => {
+            const updated = [...prev]
+            updated[updated.length-1].content += data.token
+            return updated
+          })
+        }
+      }
+      }
+      setQuery("")
+      setLoading(false)
+    }
+    catch(error){
+      setQuery('')
+      setError(error.message)
+    }
+  }
+    const handleBack = () => {
+      navigate('/dashboard')
+    }
+
+    return (  
+<div className="bg-[#1C1C1C] h-screen flex overflow-hidden font-['Inter',system-ui,sans-serif]">
+ 
+    {/* Sidebar */}
+    <aside className="w-50 min-h-screen bg-[#161616] border-r border-[#2A2A2A] flex flex-col py-7 shrink-0">
+ 
+      <div className="px-5 mb-4">
+        <p className="text-[#AAAAAA] text-[11px] tracking-[0.18em] uppercase">Documents</p>
+      </div>
+ 
+      <div className="mx-5 mb-4 border-t border-[#2A2A2A]" />
+ 
+      {/* Doc list */}
+      <nav className="flex-1 flex flex-col gap-0.5 overflow-y-auto px-3">
+        {docs.map((doc, index) => (
+            <button
+                key={index}
+                onClick={() => handleDocClick(doc)}
+                className={`w-full text-left text-[11px] font-light tracking-wide px-3 py-2.5 border-l-2 truncate transition-colors duration-150
+                    ${doc.id === doc_id
+                    ? 'text-[#FFFFFF] bg-[#252525] border-white pl-3'
+                    : 'text-[#777] border-transparent hover:text-[#D0D0D0] hover:bg-[#222] hover:border-[#444]'
+                    }`}
+            >
+                {doc.filename}
+            </button>
+        ))}
+      </nav>
+      <div className="px-5 pt-4 border-t border-[#2A2A2A]">
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-1.5 text-[#555] hover:text-[#D0D0D0]
+                     text-[9px] tracking-[0.12em] uppercase transition-colors duration-150"
+        >
+          <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+            <path d="M4 1L1 4.5M1 4.5L4 8M1 4.5H10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="square"/>
+          </svg>
+          Back
+        </button>
+      </div>
+
+    </aside>
+ 
+    {/* Main */}
+    <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
+ 
+      <header className="border-b border-[#2A2A2A] bg-[#191919] px-7 py-4 shrink-0">
+        <p className="text-[#777] text-[9px] tracking-[0.22em] uppercase mb-0.5">Analyzing</p>
+        <h2 className="text-[#F0F0F0] text-base font-light tracking-tight truncate">
+          {activeDoc?.filename ?? 'No document selected'}
+        </h2>
+      </header>
+ 
+      {/*Message*/}
+      <div className="flex-1 overflow-y-auto px-7 py-6 flex flex-col gap-6">
+ 
+        {/*Empty State*/}
+        {messages.length === 0 &&
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 py-20">
+            <div className="w-9 h-9 border border-[#383838] flex items-center justify-center">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 7C1 3.69 3.69 1 7 1s6 2.69 6 6-2.69 6-6 6S1 10.31 1 7Z" stroke="#555" strokeWidth="1"/>
+                <path d="M7 5v2.5L8.5 9" stroke="#555" strokeWidth="1" strokeLinecap="square"/>
+              </svg>
+            </div>
+            <p className="text-[#666] text-sm font-light text-center leading-6">
+              No messages yet.<br />
+              <span className="text-[#555] text-xs">Ask anything about this policy.</span>
+            </p>
+          </div>
+        }
+ 
+        {/* Messages List*/}
+        {messages.length > 0 && messages.map((msg, index) => (
+          <div
+            key={index}
+            className={`flex flex-col gap-1.5 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+          >
+ 
+            <span className="text-[#666] text-[9px] tracking-[0.15em] uppercase px-1">
+              {msg.role === 'user' ? 'You' : 'Assistant'}
+            </span>
+ 
+            <div
+              className={`max-w-[72%] px-4 py-3 text-sm font-light leading-6
+                ${msg.role === 'user'
+                  ? 'bg-[#272727] border border-[#353535] text-[#ECECEC]'
+                  : 'bg-[#202020] border border-[#2E2E2E] text-[#D4D4D4]'
+                }`}
+            >
+              {msg.content}
+            </div>
+ 
+          </div>
+        ))}
+ 
+        {/* Assistant Loading */}
+        {isLoading &&
+          <div className="flex flex-col gap-1.5 items-start">
+            <span className="text-[#666] text-[9px] tracking-[0.15em] uppercase px-1">Assistant</span>
+            <div className="bg-[#202020] border border-[#2E2E2E] px-4 py-3 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#666] animate-bounce" style={{animationDelay:'0ms'}}></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#666] animate-bounce" style={{animationDelay:'150ms'}}></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#666] animate-bounce" style={{animationDelay:'300ms'}}></span>
+            </div>
+          </div>
+        }
+ 
+        {/* API Error */}
+        {chatError !== '' &&
+          <div className="text-red-400 text-[11px] tracking-wide
+                          bg-red-500/10 border border-red-500/25 px-4 py-3 self-stretch">
+            {chatError}
+          </div>
+        }
+ 
+        <div ref={messagesEndRef} />
+ 
+      </div>
+ 
+      {/* Input Bar */}
+      <div className="border-t border-[#2A2A2A] bg-[#191919] px-5 py-4 shrink-0">
+        <div className="flex items-end gap-3 border border-[#333] bg-[#222] px-4 py-3
+                        focus-within:border-[#555] transition-colors duration-150">
+ 
+          <textarea
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e)=>{
+              if(query.trim() === '' || isLoading) return;
+              if(e.key==="Enter" && !e.shiftKey){
+                e.preventDefault()
+                handleSend()
+              }
+            }}
+            placeholder="Write your query..."
+            rows={1}
+            className="flex-1 bg-transparent text-[#E8E8E8] text-sm font-light
+                       placeholder-[#555] outline-none resize-none leading-6
+                       max-h-30 overflow-y-auto"
+          />
+ 
+          {/* Send button */}
+          <button
+            onClick={handleSend}
+            disabled={query.trim() === '' || isLoading}
+            className="shrink-0 w-7 h-7 flex items-center justify-center
+                       border border-[#444] text-[#888]
+                       hover:border-[#888] hover:text-[#F0F0F0]
+                       disabled:border-[#2A2A2A] disabled:text-[#3A3A3A] disabled:cursor-not-allowed
+                       transition-colors duration-150 self-end mb-0.5"
+          >
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M1 10L10 1M10 1H3M10 1V8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="square"/>
+            </svg>
+          </button>
+ 
+        </div>
+ 
+        <p className="text-[#555] text-[9px] tracking-wide mt-2 px-1">
+          Press Enter to send · Shift+Enter for new line
+        </p>
+ 
+      </div>
+ 
+    </main>
+ 
+  </div>
+);
+}
