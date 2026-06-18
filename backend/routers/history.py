@@ -19,3 +19,16 @@ async def get_history(
         .execute()
         )
     return result.data
+
+@router.get('/globalChat/history')
+async def get_global_history(
+    user_id: str = Depends(get_current_user)
+):
+    result = (
+        supabase.table("global_chats")
+        .select("*")
+        .eq("user_id", user_id)
+        .order("created_at")
+        .execute()
+    )
+    return result.data
