@@ -53,7 +53,7 @@ async def process_query(
             for item in chunk.content:
                 if item.get("type") == "text":
                     token += item.get("text", "")
-            full_response += token
+                full_response += token
 
             yield f'data: {json.dumps({"token" : token}, ensure_ascii=False)}\n\n'
 
