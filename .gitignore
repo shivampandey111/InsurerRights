@@ -3,10 +3,13 @@ __pycache__/
 venv/
 .venv/
 .env
+node_modules/
+dist/
+build/
 .vscode/
-notes
+notes.md
+Notes.md
 # Test file
 backend/services/testing.py
-
 # Specific PDF
 backend/scripts/Exception/Star Comprehensive Insurance Policy.pdf
