@@ -5,13 +5,11 @@ from backend.supaBase import get_supabase
 from backend.services.rag_service import get_context, build_chain
 from pydantic import BaseModel
 import json
-
 router = APIRouter()
 
 class Query(BaseModel):
     question : str
     doc_id : str
-
 def get_chat_hisory(doc_id : str, user_id : str, supabase) -> str:
     result = (
         supabase.table("chat_history")
@@ -19,7 +17,7 @@ def get_chat_hisory(doc_id : str, user_id : str, supabase) -> str:
         .eq("user_id", user_id)
         .eq("doc_id", doc_id)
         .order("created_at", desc=True)
-        .limit(5)
+        .limit(4)
         .execute()
     )
     messages = list(reversed(result.data))
@@ -30,7 +28,6 @@ async def process_query(
     req: Query, 
     user_id = Depends(get_current_user)
     ):
-
     supabase = get_supabase()
     chunks = get_context(req.question, user_id, req.doc_id, supabase)
 
@@ -39,7 +36,6 @@ async def process_query(
     
     context = "\n\n---\n\n".join(chunks)
     chat_history = get_chat_hisory(req.doc_id, user_id, supabase)
-
     chain = build_chain()
  
     async def get_response():
@@ -53,9 +49,7 @@ async def process_query(
             for item in chunk.content:
                 if item.get("type") == "text":
                     token += item.get("text", "")
-                full_response += token
-
-            yield f'data: {json.dumps({"token" : token}, ensure_ascii=False)}\n\n'
+            full_response += token
 
         supabase.table("chat_history").insert([
             {"user_id": user_id, "doc_id":req.doc_id, 
