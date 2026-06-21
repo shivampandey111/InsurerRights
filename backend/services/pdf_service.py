@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import fitz
 import io
@@ -19,7 +20,10 @@ def extract_content_from_pdf(filebytes:bytes) -> list[dict]:
             text_pages += 1
     doc.close()
     if text_pages < 1:
-        raise ValueError("No extractable text found in PDF.")
+        raise HTTPException(
+            status_code=400,
+            detail="This PDF appears to be scanned or contains no extractable text."
+        )
 
     # pdfPlumber for tables
     with pdfplumber.open(io.BytesIO(filebytes)) as pdf:
