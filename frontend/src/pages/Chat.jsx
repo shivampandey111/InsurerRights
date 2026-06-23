@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import { useNavigate, Navigate, useParams } from 'react-router-dom';
 import DashBoard from './DashBoard'
+import ReactMarkdown from "react-markdown"
 
 export default function Chat(){
     const { doc_id } = useParams()
@@ -99,43 +100,61 @@ export default function Chat(){
           })
         }
       )
-      const reader = response.body.getReader()
+
       if(!response.ok){
         const error = await response.json()
         setError(error)
         throw new Error(error.detail)
       }
-      
+      if(!response.body){
+        throw new Error("No response body")
+      }
+      const reader = response.body.getReader()
+      let buffer = ""
       const decoder = new TextDecoder()
 
       while(true) {
         const { done, value } = await reader.read()
         if(done) break
 
-        const chunk = decoder.decode(value)
-        const lines = chunk.split('\n\n')
+        buffer += decoder.decode(value, { stream : true })
+        const events = buffer.split('\n\n')
 
-        for (const line of lines){
-          if(!line.startsWith("data: ")) continue;
-          const jsonString = line.slice(6)
-          const data = JSON.parse(jsonString)
+        buffer = events.pop() || ""
         
+        for(const event of events){
+          if(!event.startsWith("data:")) continue
 
-        if(data.token){
-          setMessages(prev => {
-            const updated = [...prev]
-            updated[updated.length-1].content += data.token
-            return updated
-          })
+          const jsonString = event.slice(6)
+
+          try {
+            const data = JSON.parse(jsonString)
+            if(data.token){
+              setMessages(prev =>
+                prev.map((msg, index) =>
+                  index === prev.length - 1
+                    ? { ...msg, content: msg.content + data.token }
+                    : msg
+                )
+              )
+            }
+          }
+          catch(err){
+            console.log("BAD SSE EVENT", jsonString)
+          }
         }
-      }
+
+        
       }
       setQuery("")
-      setLoading(false)
+      
     }
     catch(error){
       setQuery('')
       setError(error.message)
+    }
+    finally{
+      setLoading(false)
     }
   }
     const handleBack = () => {
@@ -232,7 +251,7 @@ export default function Chat(){
                   : 'bg-[#202020] border border-[#2E2E2E] text-[#D4D4D4]'
                 }`}
             >
-              {msg.content}
+              <ReactMarkdown>{msg.content}</ReactMarkdown>
             </div>
  
           </div>
