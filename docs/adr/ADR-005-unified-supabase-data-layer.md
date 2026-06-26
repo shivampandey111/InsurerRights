@@ -5,7 +5,7 @@ Date: 2026-06-30
 
 ## Context
 
-PolicyClear requires multiple data capabilities:
+Insurer Rights requires multiple data capabilities:
 
 - User authentication
 - Relational data storage

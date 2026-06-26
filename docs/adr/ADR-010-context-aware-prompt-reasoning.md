@@ -1,4 +1,5 @@
-# ADR-010: Category-Level Reasoning over Literal Term Matching
+# ADR-010: Context Aware Prompt Reasoning.md
+
 
 Status: Accepted
 Date: 2026-06-19
