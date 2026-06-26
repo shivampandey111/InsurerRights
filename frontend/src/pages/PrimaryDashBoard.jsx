@@ -12,10 +12,10 @@ export default function PrimaryDashBoard(){
     const [documents, setDocs] = useState([])
     const fileInputRef = useRef(null)
     const [failed, setFailed] = useState(false)
-    const [uploading, setUploading] = useState('')
+    const [uploading, setUploading] = useState(false)
     const navigate = useNavigate()
     const [deleting, setDelete] = useState(false)
-    let [storage, setStorage] = useState('')
+    let [storage, setStorage] = useState(0)
     const [DashBoard, setDashBoard] = useState(true)
 
     const fetchDocument = async(event) => {
@@ -40,8 +40,9 @@ export default function PrimaryDashBoard(){
       fetchDocument()
     }, [loading, session])
 
+    
     documents.map((doc)=>{
-      storage += doc.storage_used_mb
+      storage += (doc.storage_used_mb)
     })
 
     const handleUploadClick = () => {
@@ -49,21 +50,22 @@ export default function PrimaryDashBoard(){
     }
 
     const handleFileChange  = async(event) => {
+        setUploading(true)
         setError(null)
         const file = event.target.files[0]
         if(!file){
           setError("Please select a file");
-          setUploading('')
+          setUploading(false)
           return
         }
         if(file.type !== 'application/pdf'){
           setError("Only PDF files are accepted");
-          setUploading('')
+          setUploading(false)
           return 
         }
         if(file.size>15*1024*1024){
           setError("Maximum size limit is 15 MB");
-          setUploading('')
+          setUploading(false)
           return
         }
 
@@ -73,7 +75,8 @@ export default function PrimaryDashBoard(){
         const tempDoc = {
           id : crypto.randomUUID(),
           filename : file.name,
-          status : "decoding"
+          status : "decoding",
+          storage_used_mb: 0
         }
 
         setDocs(prev => [tempDoc, ...prev])
@@ -103,6 +106,9 @@ export default function PrimaryDashBoard(){
                 : doc
             )
           )
+        }
+        finally{
+          setUploading(false)
         }
     }
     
@@ -202,24 +208,15 @@ export default function PrimaryDashBoard(){
                     {/* State */}
                     <td className="px-4 py-4 align-middle">
 
-                      {/* DECODING — first processing stage */}
+                      {/* Processing */}
                       
                         {doc.status === 'decoding' && <span className="items-center gap-1.5
                                          text-amber-300/80 text-[10px] tracking-wide
                                          bg-amber-400/8 border border-amber-400/20 px-2.5 py-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-amber-300/80 animate-pulse shrink-0"></span>
-                          Decoding Rights
+                          Please Wait
                         </span>}
 
-                      {/* OPTIMIZING */}
-                      {doc.status === 'processing' &&
-                        <span className="inline-flex items-center gap-1.5
-                                         text-amber-300/80 text-[10px] tracking-wide
-                                         bg-amber-400/8 border border-amber-400/20 px-2.5 py-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-300/80 animate-pulse shrink-0"></span>
-                          Preparing
-                        </span>}
-                        
                         {doc.status === 'processed' && <span className="inline-flex items-center gap-1.5
                                          text-emerald-300/80 text-[10px] tracking-wide
                                          bg-emerald-400/8 border border-emerald-400/20 px-2.5 py-1">
@@ -228,7 +225,7 @@ export default function PrimaryDashBoard(){
                         </span>}
                       
 
-                      {/* FAILED */}
+                      {/* Failed */}
                       {doc.status === 'failed' &&
                         <span className="inline-flex items-center gap-1.5
                                          text-red-400/80 text-[10px] tracking-wide
@@ -317,10 +314,10 @@ export default function PrimaryDashBoard(){
           <span className="text-[#888] text-[10px] tracking-widest group-hover:text-[#C0C0C0]
                           transition-colors duration-150">
             <span className="text-[#C0C0C0] group-hover:text-white transition-colors duration-150">
-              {storage} MB
+              {storage.toFixed(2)} MB
             </span>
             {' '}/{' '}
-            <span>50 MB</span>
+            <span>25 MB</span>
           </span>
         </div>
         

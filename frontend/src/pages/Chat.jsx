@@ -52,7 +52,7 @@ export default function Chat(){
     useEffect(()=>{
       if(loading) return
       if(!session) return
-
+      setError('')
       fetchHistory()
     }, [loading, session, doc_id])
 
