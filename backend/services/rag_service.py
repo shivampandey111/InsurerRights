@@ -23,14 +23,20 @@ def chat_model():
 def get_context(query: str, user_id : str, doc_id : str, supabase) -> list[str]:
     start = time.time()
     model = embedding_model()
+
+    embed_start = time.time()
     query_embeds = model.embed_query(query)
+    embed_ms = (time.time()-embed_start) * 1000
+
     # Similarity search againts the query embeds from the respective doc vectors
+    retrieval_start = time.time()
     response = supabase.rpc("match_doc_chunks", {
         "query" : query_embeds,
         "user_id_filter" : user_id,
         "doc_id_filter" : doc_id,
         "count" : 3
     }).execute()
+    retrieval_ms = (time.time() - retrieval_start) * 1000
     latency_ms = (time.time()-start) * 1000
     chunks = response.data
 
@@ -43,9 +49,11 @@ def get_context(query: str, user_id : str, doc_id : str, supabase) -> list[str]:
         "max_similarity" : round(max(similarity_score), 3) if similarity_score else 0,
         "min_similarity" : round(min(similarity_score), 3) if similarity_score else 0,
         "retrieval_latency_ms" : round(latency_ms, 1),
+        "embedding_latency_ms" : round(embed_ms, 1),
         "doc_id" : str(doc_id),
         "mode" : "Global" if user_id == admin_id else "Document"
     })
+    
 
     if similarity_score and max(similarity_score) <0.6:
         sentry_sdk.capture_message(
