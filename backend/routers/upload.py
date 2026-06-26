@@ -71,7 +71,6 @@ async def upload_pdf(
 ):
     chunks, embeddings, size = await process_file(file)
 
-    
     try:
         response = (
                 supabase.table("documents")
