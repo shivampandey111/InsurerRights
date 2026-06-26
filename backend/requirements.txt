@@ -12,3 +12,4 @@ sentry-sdk
 slowapi
 pdfplumber
 pypdf
+email-validator
