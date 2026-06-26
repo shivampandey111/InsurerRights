@@ -199,4 +199,3 @@ utility while preserving the benefits of Retrieval-Augmented Generation.
 - ADR-007: Insurance-Aware Chunking Strategy
 - ADR-008: Hybrid Retrieval Scope (Policy and Regulatory Knowledge)
 - ADR-009: Separation of Policy Knowledge and Insurance Knowledge
-- ADR-011: Fallback-to-Knowledge Response Strategy

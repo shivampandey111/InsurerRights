@@ -224,4 +224,3 @@ retrieval problem.
 - ADR-006: Dual Conversation Modes (Document Chat and Global Chat)
 - ADR-008: Hybrid Retrieval Scope (Policy Documents and Regulatory Knowledge)
 - ADR-010: Category-Level Reasoning over Literal Term Matching
-- ADR-011: Fallback-to-Knowledge Response Strategy

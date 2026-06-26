@@ -216,4 +216,3 @@ literal term matching.
 
 - ADR-008: Hybrid Retrieval Scope (Policy Documents and Regulatory Knowledge)
 - ADR-009: Separation of Policy Knowledge and Insurance Domain Knowledge
-- ADR-011: Fallback-to-Knowledge Response Strategy
