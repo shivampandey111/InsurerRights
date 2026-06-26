@@ -361,7 +361,7 @@ Always verify important decisions against the original policy wording and consul
 
 ## Author
 
-**[Shivam Pandey](www.linkedin.com/in/shivampandey111)** 
+**[Shivam Pandey](https://www.linkedin.com/in/shivampandey111/)** 
 
 Built as a capstone project exploring production-grade AI engineering, Retrieval-Augmented Generation (RAG), document intelligence, and scalable backend architecture.
 
