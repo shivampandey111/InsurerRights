@@ -69,6 +69,9 @@ async def upload_pdf(
 ):
     chunks, embeddings, size = await process_file(file)
 
+    if(len(chunks)>500):
+        raise HTTPException(413, detail=(f"The document is too large to process on this deployement" 
+                                         f"({len(chunks)}) chunks. Maximum supported: 500 Chunks"))
     try:
         response = (
                 supabase.table("documents")
