@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from fastapi import APIRouter, HTTPException
-from backend.supaBase import get_supabase
+from supaBase import get_supabase
 from dotenv import load_dotenv
 import os
 router = APIRouter()

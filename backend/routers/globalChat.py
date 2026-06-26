@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
-from backend.routers.dependencies import get_current_user
-from backend.supaBase import get_supabase
+from routers.dependencies import get_current_user
+from supaBase import get_supabase
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from backend.services.global_chat_service import build_chain
+from services.global_chat_service import build_chain
 import json
 
 router = APIRouter()

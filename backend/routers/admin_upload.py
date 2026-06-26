@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
-from backend.routers.dependencies import get_current_user
-from backend.routers.upload import process_file, store, store_vectors
+from routers.dependencies import get_current_user
+from routers.upload import process_file, store, store_vectors
 from dotenv import load_dotenv
 import os
 load_dotenv()

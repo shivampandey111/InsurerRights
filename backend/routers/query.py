@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
-from backend.routers.dependencies import get_current_user
+from routers.dependencies import get_current_user
 from fastapi.responses import StreamingResponse
-from backend.supaBase import get_supabase
-from backend.services.rag_service import get_context, build_chain
+from supaBase import get_supabase
+from services.rag_service import get_context, build_chain
 from pydantic import BaseModel
 import json
 router = APIRouter()

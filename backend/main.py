@@ -4,7 +4,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import auth, query, upload, docs, history, globalChat, admin_upload
+from routers import auth, query, upload, docs, history, globalChat, admin_upload
 
 load_dotenv()
 

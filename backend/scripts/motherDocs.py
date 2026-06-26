@@ -1,6 +1,6 @@
-from backend.supaBase import get_supabase
-from backend.services.pdf_service import get_chunks, extract_content_from_pdf
-from backend.services.embedding_service import get_embeds
+from supaBase import get_supabase
+from services.pdf_service import get_chunks, extract_content_from_pdf
+from services.embedding_service import get_embeds
 from pathlib import Path
 import uuid
 supabase = get_supabase()

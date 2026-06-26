@@ -1,8 +1,8 @@
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
-from backend.supaBase import get_supabase
-from backend.services.embedding_service import embedding_model
+from supaBase import get_supabase
+from services.embedding_service import embedding_model
 import os, time, sentry_sdk
 from dotenv import load_dotenv
 

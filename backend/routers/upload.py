@@ -1,8 +1,8 @@
 from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
-from backend.supaBase import get_supabase
-from backend.services.pdf_service import extract_content_from_pdf, get_chunks
-from backend.services.embedding_service import get_embeds
-from backend.routers.dependencies import get_current_user
+from supaBase import get_supabase
+from services.pdf_service import extract_content_from_pdf, get_chunks
+from services.embedding_service import get_embeds
+from routers.dependencies import get_current_user
 import uuid
 
 router = APIRouter()

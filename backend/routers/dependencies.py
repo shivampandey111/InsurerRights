@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from backend.supaBase import get_supabase
+from supaBase import get_supabase
 
 security = HTTPBearer()
 
