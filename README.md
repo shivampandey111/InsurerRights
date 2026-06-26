@@ -59,7 +59,6 @@ For every question, the system authenticates the user, retrieves the most releva
 <p align="center">
   <img src="docs/architecture/query-processing-workflow.png" alt="Query Processing Workflow" width="100%">
 </p>
-```
 
 ---
 
