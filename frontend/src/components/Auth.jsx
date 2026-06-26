@@ -1,7 +1,7 @@
 import { useState } from "react";
 import supabase from "../supabaseClient";
 import DashBoard from "../pages/DashBoard";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function Auth(){
     const [isLogin, setIsLogin] = useState(true);
@@ -48,6 +48,9 @@ export default function Auth(){
         console.log('Error Message Register')
       }
     }
+    const handleBack = () => {
+      navigate(`/landing`)
+    }
     return (
   <div className="bg-[#0A0A0A] min-h-screen flex items-center justify-center px-6 font-['Inter',system-ui,sans-serif]">
 
@@ -55,7 +58,7 @@ export default function Auth(){
 
       {isLogin ? (
 
-        /* ── LOGIN ─────────────────────────────────────── */
+        /* Login */
         <div>
           <div className="mb-10">
             <p className="text-[#444] text-[10px] tracking-[0.22em] uppercase mb-3">Sign in</p>
@@ -116,7 +119,7 @@ export default function Auth(){
 
       ) : (
 
-        /* ── REGISTER ───────────────────────────────────── */
+        /* Register*/
         <div>
           <div className="mb-10">
             <p className="text-[#444] text-[10px] tracking-[0.22em] uppercase mb-3">Get started</p>
@@ -187,7 +190,19 @@ export default function Auth(){
         </div>
 
       )}
-
+      {/* Back button */}
+      <div className="mt-4 flex justify-center">
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-1.5 text-[#3A3A3A] hover:text-[#888]
+                    text-[11px] tracking-widest transition-colors duration-150"
+        >
+          <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+            <path d="M5 1L1 5M1 5L5 9M1 5H11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="square"/>
+          </svg>
+          Back
+        </button>
+      </div>
     </div>
   </div>
 );

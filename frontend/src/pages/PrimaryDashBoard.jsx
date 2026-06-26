@@ -292,7 +292,7 @@ export default function PrimaryDashBoard(){
 
       </div>
 
-      {/* FOOTER */}
+      {/* Footer */}
       <footer className="border-t border-[#222] px-8 py-4 flex items-center justify-between shrink-0">
 
         <p className="text-[#444] text-[11px] tracking-wide">

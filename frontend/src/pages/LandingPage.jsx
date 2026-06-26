@@ -39,7 +39,7 @@ return (
 
     </nav>
 
-    {/* ── HERO */}
+    {/*Hero */}
     <section className="dot-grid min-h-screen flex flex-col justify-center
                         pt-[9rem] pb-[6rem] px-10">
       <div className="max-w-[1140px] mx-auto w-full flex flex-col">
@@ -86,7 +86,7 @@ return (
 
     <hr className="border-none border-t border-[#1c1c1c] h-px bg-[#1c1c1c]" />
 
-    {/* HOW IT WORKS  */}
+    {/* How it works  */}
     <div id="how" className="max-w-[1140px] mx-auto py-20 px-10">
 
       <p className="font-['Space_Mono',monospace] text-[11px] tracking-[0.15em]
@@ -128,7 +128,7 @@ return (
 
     <hr className="border-none border-t border-[#1c1c1c] h-px bg-[#1c1c1c]" />
 
-    {/* ── UPCOMING FEATURES ────────────────────────────────────────────────── */}
+    {/* Upcoming features*/}
     <div className="max-w-[1140px] mx-auto py-20 px-10">
 
       <p className="font-['Space_Mono',monospace] text-[11px] tracking-[0.15em]
@@ -203,7 +203,7 @@ return (
 
     <hr className="border-none border-t border-[#1c1c1c] h-px bg-[#1c1c1c]" />
 
-    {/* FOOTER */}
+    {/* Footer */}
     <footer className="px-10 py-7 flex items-center justify-between flex-wrap gap-4">
 
       <span className="font-['Space_Mono',monospace] text-[11px] text-[#888] tracking-[0.06em]">
