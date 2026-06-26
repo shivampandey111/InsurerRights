@@ -30,38 +30,39 @@ Insurer Rights makes that asymmetry a solved problem.
 
 ## Architecture
 
-```
-                        ┌─────────────────────────────────────┐
-CLIENT LAYER            │           React + Vite               │
-                        │  Auth · Dashboard · Chat · SSE UI    │
-                        └────────────────┬────────────────────┘
-                                         │ JWT  /  SSE stream
-                        ┌────────────────▼────────────────────┐
-APPLICATION LAYER       │           FastAPI (Python)           │
-                        │  Depends(get_current_user)           │
-                        │  ┌──────────────┐ ┌──────────────┐  │
-                        │  │ PDF Ingestion│ │  RAG Query   │  │
-                        │  │ PyMuPDF      │ │  LCEL chain  │  │
-                        │  │ + pdfplumber │ │  chain.astr..│  │
-                        │  └──────┬───────┘ └──────┬───────┘  │
-                        └─────────┼────────────────┼──────────┘
-                                  │                │
-                        ┌─────────▼────────────────▼──────────┐
-DATA LAYER              │           Supabase (Postgres)        │
-                        │  pgvector · chat_history · documents │
-                        └─────────────────────────────────────┘
-                                         │
-                        ┌────────────────▼────────────────────┐
-EXTERNAL APIs           │          Google Gemini               │
-                        │  text-embedding-002 · 3.5 Flash      │
-                        └─────────────────────────────────────┘
-```
+The platform follows a layered architecture consisting of a React frontend, a FastAPI backend, a PostgreSQL database with pgvector for vector search, and Google's Gemini APIs for embeddings and language generation.
 
-**Ingestion flow:** PDF upload → two-pass extraction (PyMuPDF text + pdfplumber tables) → insurance-aware chunking → Gemini embeddings (batched, rate-limit-safe) → pgvector with `doc_id` / `visibility` metadata
+### System Architecture
 
-**Query flow:** User query → embed → pgvector RPC similarity search → last 4 chat turns from `chat_history` → LangChain LCEL chain → `chain.astream()` → SSE `StreamingResponse` → React
+The high-level architecture illustrates the interaction between the client, application services, data layer, and external AI services.
+
+<p align="center">
+  <img src="docs/architecture/system-architecture.png" alt="System Architecture" width="100%">
+</p>
 
 ---
+
+### Document Ingestion Workflow
+
+When a user uploads a policy document, the backend validates the request, extracts text and tables, generates embeddings, and stores both document metadata and vector representations for retrieval.
+
+<p align="center">
+  <img src="docs/architecture/document-ingestion-workflow.png" alt="Document Ingestion Workflow" width="100%">
+</p>
+
+---
+
+### Query Processing Workflow
+
+For every question, the system authenticates the user, retrieves the most relevant document chunks using pgvector similarity search, combines them with recent conversation history, constructs the final prompt, and streams the generated response back to the client using Server-Sent Events (SSE).
+
+<p align="center">
+  <img src="docs/architecture/query-processing-workflow.png" alt="Query Processing Workflow" width="100%">
+</p>
+```
+
+---
+
 
 ## Stack
 
@@ -213,6 +214,10 @@ docs/
 │   │                              # RAG pipeline, retrieval, reasoning, and streaming
 │   ├── ADR_INDEX.md
 │   └── ENGINEERING_NOTES.md
+├── architecture/
+│   ├── document-ingestion-workflow.png
+│   ├── query-processing-workflow.png
+│   └── system-architecture.png
 │
 └── database/
     └── schema.sql
