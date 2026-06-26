@@ -1,7 +1,7 @@
 import { useState } from "react";
 import supabase from "../supabaseClient";
 import DashBoard from "../pages/DashBoard";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, replace, useNavigate } from "react-router-dom";
 
 export default function Auth(){
     const [isLogin, setIsLogin] = useState(true);
@@ -49,7 +49,7 @@ export default function Auth(){
       }
     }
     const handleBack = () => {
-      navigate(`/landing`)
+      navigate("/", {replace : true})
     }
     return (
   <div className="bg-[#0A0A0A] min-h-screen flex items-center justify-center px-6 font-['Inter',system-ui,sans-serif]">

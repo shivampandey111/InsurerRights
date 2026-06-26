@@ -1,6 +1,5 @@
 import { useState } from "react"
 import supabase from "../supabaseClient"
-import Landing from "./LandingPage"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 export default function Sidebar(){
@@ -19,7 +18,7 @@ export default function Sidebar(){
       navigate(`/dashboard`)
     }
     const handleLogOut =  () => {
-        navigate("/landing", { replace: true })
+        navigate("/", { replace: true })
          supabase.auth.signOut()
     }
     
