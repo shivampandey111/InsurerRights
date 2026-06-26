@@ -3,11 +3,13 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from backend.supaBase import get_supabase
 from backend.services.embedding_service import embedding_model
-import os
+import os, time, sentry_sdk
 from dotenv import load_dotenv
 
 load_dotenv()
 supabase = get_supabase()
+admin_id = os.getenv("ADMIN_USER_ID")
+
 def chat_model():
     return ChatGoogleGenerativeAI(
         model = "gemini-3.5-flash",
@@ -19,7 +21,7 @@ def chat_model():
 # RAG Service: Context + Query 
 
 def get_context(query: str, user_id : str, doc_id : str, supabase) -> list[str]:
-
+    start = time.time()
     model = embedding_model()
     query_embeds = model.embed_query(query)
     # Similarity search againts the query embeds from the respective doc vectors
@@ -29,8 +31,28 @@ def get_context(query: str, user_id : str, doc_id : str, supabase) -> list[str]:
         "doc_id_filter" : doc_id,
         "count" : 3
     }).execute()
+    latency_ms = (time.time()-start) * 1000
+    chunks = response.data
 
-    return [row["content"] for row in response.data]
+    similarity_score = [r["similarity"] for r in chunks]
+
+    sentry_sdk.set_context("rag_retrieval", {
+        "question_length" : len(query),
+        "chunks_retrieved" : len(chunks),
+        "avg_similarity" : round(sum(similarity_score) / len(similarity_score), 3) if similarity_score else 0,
+        "max_similarity" : round(max(similarity_score), 3) if similarity_score else 0,
+        "min_similarity" : round(min(similarity_score), 3) if similarity_score else 0,
+        "retrieval_latency_ms" : round(latency_ms, 1),
+        "doc_id" : str(doc_id),
+        "mode" : "Global" if user_id == admin_id else "Document"
+    })
+
+    if similarity_score and max(similarity_score) <0.6:
+        sentry_sdk.capture_message(
+            f"Low Similarity Retrieval: max{max(similarity_score):.3f}",
+            level="warning"
+        )
+    return [r["content"] for r in chunks]
 
 PROMPT_TEMPLATE = """
 You are Insurer Rights, an insurance rights assistant helping Indian policyholders understand their insurance policy.
