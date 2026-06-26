@@ -19,25 +19,56 @@ def get_storage_used(chunks: list[str]) -> float:
         total_bytes / (1024*1024), 2
     )
 
+# Validate the type and size of the file
+async def validate_file(file):
+    if file.content_type != "application/pdf":
+        raise HTTPException(400, "Only pdf files are expected")
+
+    file_bytes = await file.read()  # The return type is bytes
+    if len(file_bytes) > 15 * 1024 * 1024:
+        raise HTTPException(401, "Max file size allowed is 10mb")
+    return file_bytes
+
+# Process file
+async def process_file(file):
+    file_bytes = await validate_file(file)
+    text = extract_content_from_pdf(file_bytes)
+    chunk = get_chunks(text)
+    estimated_storage = get_storage_used(chunk)
+    embeddings = get_embeds(chunk)
+
+    return chunk, embeddings, estimated_storage
+
+# Store the doc meta data
+def store(user_id, filename, chunks, size):
+    doc_id = str(uuid.uuid4())
+    supabase.table("documents").insert({
+        "id" : doc_id,
+        "user_id" : user_id,
+        "filename" : filename,
+        "chunk_count" : len(chunks),
+        "storage_used_mb" : size
+    }).execute()
+    return doc_id
+
+# Store vectors 
+def store_vectors(doc_id, chunks, embeddings, visibility, user_id):
+    rows = [{
+        "doc_id" : doc_id,
+        "user_id" : user_id,
+        "content" : chunk,
+        "embedding" : embedding,
+        "visibility" : visibility
+    } for chunk, embedding in zip(chunks, embeddings)]
+    supabase.table("document_chunks").insert(rows).execute()
+
 @router.post('/api/upload')
 async def upload_pdf(
     file: UploadFile = File(...), 
     user_id = Depends(get_current_user)
 ):
-    # Validate the type and size of the file
-    if file.content_type != "application/pdf":
-        raise HTTPException(400, "Only pdf files are expected")
-    
-    file_bytes = await file.read()  # The return type is bytes
-    if len(file_bytes) > 15 * 1024 * 1024:
-        raise HTTPException(401, "Max file size allowed is 10mb")
+    chunks, embeddings, size = await process_file(file)
 
-    # Extract and Chunk
-    text = extract_content_from_pdf(file_bytes)
-    chunk = get_chunks(text)
-
-    # Get Storage Consumed 
-    estimated_storage = get_storage_used(chunk)
     try:
         response = (
                 supabase.table("documents")
@@ -50,41 +81,23 @@ async def upload_pdf(
                 for row in response.data
             )
         LIMIT_MB = 50
-        if estimated_storage + current_storage > LIMIT_MB:
-            print(estimated_storage)
-            print(current_storage)
+        if size + current_storage > LIMIT_MB:
             raise HTTPException(
                 status_code=400,
                 detail="Storage Excedded"
             )
     except Exception as e:
         print(type(e))
-        raise HTTPException(400, str(e))
-        
-    # Get Embeddings
-    embedding = get_embeds(chunk)
+        raise HTTPException(400, str(e))    
+    filename = file.filename
 
-    # Store the document
-    doc_id = str(uuid.uuid4())
-    supabase.table("documents").insert({
-        "id" : doc_id,
-        "user_id" : user_id,
-        "filename" : file.filename,
-        "chunk_count" : len(chunk),
-        "storage_used_mb" : estimated_storage
-    }).execute()
+    # Store the document meta data 
+    doc_id = store(user_id=user_id, filename=filename, chunks=chunks, size=size)
 
     # Store the vectors
-    rows = [{
-        "doc_id" : doc_id,
-        "user_id" : user_id,
-        "content" : chunk,
-        "embedding" : embedding,
-        "visibility" : "private"
-    } for chunk, embedding in zip(chunk, embedding)]
-    supabase.table("document_chunks").insert(rows).execute()
-
+    store_vectors(doc_id=doc_id, 
+                  chunks=chunks, embeddings=embeddings, visibility="private", user_id=user_id)
     return {
         "doc_id" : doc_id,
-        "chunks" : len(chunk)
+        "chunks" : len(chunks)
     }
