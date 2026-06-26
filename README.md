@@ -168,7 +168,7 @@ VITE_SUPABASE_ANON_KEY=
 
 ## Project Structure
 
-## 📂 Backend Structure
+### 📂 Backend Structure
 
 ```text
 backend/
@@ -203,7 +203,7 @@ backend/
 
 ```
 
-## 📂 Documentation
+### 📂 Documentation
 
 ```text
 docs/
@@ -218,7 +218,7 @@ docs/
     └── schema.sql
 ```
 
-## 📂 Frontend Structure
+### 📂 Frontend Structure
 
 ```text
 frontend/
@@ -294,6 +294,47 @@ Special thanks to the teams behind:
 - **Tailwind CSS** — utility-first frontend styling
 
 Their work makes building production-grade AI applications significantly more accessible.
+
+---
+
+## Known Limitations
+
+### API Rate Limits
+
+This project currently relies on hosted embedding and language model APIs.
+
+Large documents may generate hundreds of embedding chunks during ingestion. When API rate limits or quotas are reached:
+
+- New document uploads cannot be indexed until the quota resets.
+- Query embeddings may be temporarily unavailable.
+- Retrieval performance is unaffected for documents that have already been indexed.
+
+The ingestion pipeline batches embedding requests and includes rate-limit handling, but available throughput ultimately depends on the configured API provider.
+
+### Large Documents
+
+Very large policy documents can produce hundreds or thousands of chunks depending on their structure.
+
+Although embeddings are generated in batches, indexing extremely large PDFs may take additional time and, on free API tiers, may exceed the available quota.
+
+Production deployments should consider:
+
+- Using higher API quotas.
+- Background ingestion with retry queues.
+- Document size or chunk-count limits.
+- Alternative embedding providers.
+
+### Scanned PDFs
+
+The ingestion pipeline extracts text using **PyMuPDF** and **pdfplumber**, and therefore requires digitally searchable PDFs.
+
+Image-based or scanned documents currently require an OCR pipeline, which is planned for a future release.
+
+### Table Extraction
+
+Insurance policies frequently contain complex tables with merged cells and irregular layouts.
+
+The hybrid extraction pipeline preserves most table structures, but highly complex formatting may still reduce retrieval quality.
 
 ---
 
