@@ -12,7 +12,7 @@ supabase = get_supabase()
 class Query(BaseModel):
     question: str
 
-def get_chat_hisory(user_id : str, supabase) -> str:
+def get_chat_history(user_id : str, supabase) -> str:
     result = (
         supabase.table("global_chats")
         .select("role, content")
@@ -29,7 +29,7 @@ async def global_Chat(
     req : Query,
     user_id = Depends(get_current_user)
 ):
-    history = get_chat_hisory(user_id, supabase)
+    history = get_chat_history(user_id, supabase)
     chain = build_chain()
 
     async def get_response():
@@ -42,9 +42,11 @@ async def global_Chat(
             for item in chunk.content:
                 if item.get("type") == "text":
                     token += item.get("text", "")
+               
+            if token:
                 full_response += token
-            
-            yield f'data: {json.dumps({"token" : token}, ensure_ascii=False)}\n\n'
+                yield f'data: {json.dumps({"token": token})}\n\n'
+
         
         supabase.table("global_chats").insert([
             {"user_id": user_id, "role": "user", "content" : req.question},

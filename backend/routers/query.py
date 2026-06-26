@@ -10,7 +10,7 @@ router = APIRouter()
 class Query(BaseModel):
     question : str
     doc_id : str
-def get_chat_hisory(doc_id : str, user_id : str, supabase) -> str:
+def get_chat_history(doc_id : str, user_id : str, supabase) -> str:
     result = (
         supabase.table("chat_history")
         .select("role, content")
@@ -35,7 +35,7 @@ async def process_query(
         return {"answer" : "No relevant context found among your document"}
     
     context = "\n\n---\n\n".join(chunks)
-    chat_history = get_chat_hisory(req.doc_id, user_id, supabase)
+    chat_history = get_chat_history(req.doc_id, user_id, supabase)
     chain = build_chain()
  
     async def get_response():
@@ -49,7 +49,9 @@ async def process_query(
             for item in chunk.content:
                 if item.get("type") == "text":
                     token += item.get("text", "")
-            full_response += token
+            if token:
+                full_response += token
+                yield f'data: {json.dumps({"token": token})}\n\n'
 
         supabase.table("chat_history").insert([
             {"user_id": user_id, "doc_id":req.doc_id, 
@@ -57,8 +59,6 @@ async def process_query(
              {"user_id":user_id, "doc_id":req.doc_id,
               "role":"assistant", "content": full_response}
         ]).execute()
-
-        yield f'data: {json.dumps({"done" : True})}\n\n'
 
     return StreamingResponse(get_response(), media_type="text/event-stream")
             
