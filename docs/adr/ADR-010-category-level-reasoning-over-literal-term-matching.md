@@ -1,4 +1,5 @@
-# ADR-010: Category-Level Reasoning over Literal Term Matching
+# ADR-010: Context Aware Prompt Reasoning.md
+
 
 Status: Accepted
 Date: 2026-06-19
@@ -216,4 +217,3 @@ literal term matching.
 
 - ADR-008: Hybrid Retrieval Scope (Policy Documents and Regulatory Knowledge)
 - ADR-009: Separation of Policy Knowledge and Insurance Domain Knowledge
-- ADR-011: Fallback-to-Knowledge Response Strategy
