@@ -18,7 +18,7 @@ app = FastAPI(title="Insurer Rights")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins = ["http://localhost:5173"],
+    allow_origins = ["https://insurer-rights.vercel.app/"],
     allow_credentials = True,
     allow_headers = ['*'],
     allow_methods = ['*']
