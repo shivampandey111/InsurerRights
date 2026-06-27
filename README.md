@@ -1,4 +1,4 @@
-# Insurer Rights
+# [Insurer Rights](https://insurer-rights.vercel.app/)
 
 **Your policy is 60 pages. Your claim was rejected in one line.**
 
