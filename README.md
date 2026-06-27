@@ -33,6 +33,21 @@ Insurer Rights makes that asymmetry a solved problem.
 
 ---
 
+## Problem Statement
+
+This project addresses Fix My Itch #82 from Razorpay's curated problem 
+database — scored 82/100 (Frequency: 10, TAM: 10, Severity: 8, Whitespace: 9).
+
+> Policyholders make uninformed decisions because insurance documents are 
+> written in legal and technical language, obscuring exclusions and conditions 
+> that directly affect claim outcomes.
+
+A Frequency of 10 and TAM of 10 means this is a problem that affects nearly 
+everyone who holds an insurance policy in India for which no good solution exists 
+yet (Whitespace: 9).
+
+---
+
 ## Architecture
 
 The platform follows a layered architecture consisting of a React frontend, a FastAPI backend, a PostgreSQL database with pgvector for vector search, and Google's Gemini APIs for embeddings and language generation.
