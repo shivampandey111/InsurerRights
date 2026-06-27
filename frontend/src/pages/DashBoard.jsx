@@ -5,7 +5,7 @@ import GlobalChat from './GlobalChat';
 
 export default function Main(){
     return (
-      <div className="bg-[#0C0C0C] min-h-screen flex font-['Inter',system-ui,sans-serif]">
+      <div className="bg-[#0C0C0C] h-screen flex font-['Inter',system-ui,sans-serif]">
         <Sidebar/>
       <Outlet/>
   </div>

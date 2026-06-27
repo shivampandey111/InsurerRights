@@ -59,7 +59,7 @@ async def process_query(
              {"user_id":user_id, "doc_id":req.doc_id,
               "role":"assistant", "content": full_response}
         ]).execute()
-
+        
     return StreamingResponse(get_response(), media_type="text/event-stream")
             
     

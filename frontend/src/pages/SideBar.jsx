@@ -23,7 +23,7 @@ export default function Sidebar(){
     }
     
     return (
-        <aside className="w-40 min-h-screen bg-[#111111] border-r border-[#242424] flex flex-col py-8 px-5 shrink-0">
+        <aside className="w-40 h-screen bg-[#111111] border-r border-[#242424] flex flex-col py-8 px-5 shrink-0">
 
       {/* Greeting */}
       <div className="mb-10">
