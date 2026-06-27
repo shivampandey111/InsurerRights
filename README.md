@@ -12,7 +12,7 @@ An AI-powered platform that gives Indian policyholders the same information adva
 
 ---
 
-![Demo](docs/demo.gif)
+![Demo](docs/Insurer%20Rights.mp4)
 
 ---
 
@@ -68,10 +68,10 @@ For every question, the system authenticates the user, retrieves the most releva
 
 | Layer | Technology | Reason |
 |---|---|---|
-| Frontend | React + Vite + Tailwind CSS | — |
+| Frontend | React + Vite + Tailwind CSS | Component architecture, fast development iteration |
 | Backend | FastAPI (Python) | Native async, native AI library support |
 | Vector store | Supabase pgvector | Persistent — survives Render restarts unlike FAISS/Chroma |
-| Embeddings | Gemini `text-embedding-002` (1024 dims) | Free tier, quality competitive with Ada-002 |
+| Embeddings | Gemini `embedding-2` (1024 dims) | Free tier, quality competitive with Ada-002 |
 | LLM | Gemini 3.5 Flash via `ChatGoogleGenerativeAI` | Free tier, fast |
 | RAG orchestration | LangChain LCEL pipe operator | Composable, streamable |
 | PDF extraction | PyMuPDF + pdfplumber (hybrid) | See ADR-002 |
@@ -368,22 +368,6 @@ The current release focuses on solving the core problem: helping policyholders u
 - [ ] Policy renewal recommendations
 - [ ] Multi-policy workspace
 - [ ] Conversation export
-
----
-
-## Contributing
-
-Contributions, discussions, and suggestions are welcome.
-
-If you'd like to contribute:
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Follow the existing project structure and coding style.
-4. Update relevant documentation where necessary.
-5. Open a Pull Request describing the motivation behind your changes.
-
-For significant architectural changes, consider adding or updating the relevant Architectural Decision Record (ADR) before submitting your pull request.
 
 ---
 

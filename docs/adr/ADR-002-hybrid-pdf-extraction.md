@@ -86,6 +86,46 @@ Limit: ₹6000/day
 Table content is preserved as independent chunks rather than merged into
 surrounding text.
 
+### Merged Cell Handling
+
+Insurance policy tables frequently use merged row headers — a single label in the first column spans multiple data rows. pdfplumber returns `None` for cells that are part of a vertical span, because the underlying PDF structure does not repeat the cell value across the rows it visually covers.
+
+Without explicit handling, these `None` values produce broken output:
+
+```text
+[TABLE]
+
+Benefit: Room Rent
+Limit: ₹3000/day
+
+Benefit: None       ← row 2 of the same benefit group
+Limit: ₹6000/day
+```
+
+The `table_to_text()` function tracks the last non-None value seen in the label column via a `last_row_label` variable and carries it forward to subsequent rows where the cell is `None`:
+
+```python
+def table_to_text(table: list[list]) -> str:
+    headers = table[0]
+    lines = ["[TABLE]"]
+    last_row_label = None
+
+    for row in table[1:]:
+        if row[0] is not None:
+            last_row_label = row[0]
+        label = last_row_label
+
+        parts = []
+        for header, cell in zip(headers, row):
+            value = cell if cell is not None else ""
+            parts.append(f"{header}: {value}")
+        lines.append(" | ".join(parts))
+
+    return "\n".join(lines)
+```
+
+This ensures that multi-row benefit groups remain correctly attributed, preserving the semantic relationship that the retrieval pipeline depends on.
+
 ---
 
 ## Alternatives Considered
@@ -164,6 +204,7 @@ surrounding text.
 - Additional dependency maintenance.
 - More complex extraction workflow.
 - Higher implementation complexity than a single-library approach.
+- Merged cell handling requires stateful row iteration (`last_row_label` carry-forward); naïve iteration over pdfplumber output produces corrupted label attribution.
 
 ---
 
@@ -186,4 +227,4 @@ accuracy over ingestion speed.
 
 - ADR-001: Use pgvector as the Vector Store
 - ADR-003: JWT Authentication via FastAPI Dependency Injection
-- ADR-005: Insurance-Aware Chunking Strategy
+- ADR-007: Insurance-Aware Chunking Strategy
