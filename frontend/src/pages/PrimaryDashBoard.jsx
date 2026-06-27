@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import useAuth from '../hooks/useAuth';
+import ConnectingState from '../components/ConnectingState';
 import ProtectedRoute from '../components/ProtectedRoute';
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 export default function PrimaryDashBoard(){
     const { session, loading } = useAuth()
     const accessToken = session?.access_token
-    const [loadingDocs, setLoadingDocs] = useState('')
+    const [loadingDocs, setLoadingDocs] = useState(true)
     const [error, setError] = useState(null)
     const [documents, setDocs] = useState([])
     const fileInputRef = useRef(null)
@@ -19,8 +20,10 @@ export default function PrimaryDashBoard(){
     const [DashBoard, setDashBoard] = useState(true)
 
     const fetchDocument = async(event) => {
+      setLoadingDocs(true)
       setError(null)
-        const response = await axios.get(
+        try 
+          {const response = await axios.get(
             `${import.meta.env.VITE_API_URL}/api/documents`,
         {
             headers: {
@@ -31,7 +34,13 @@ export default function PrimaryDashBoard(){
         setDocs(response.data.map(doc=>({
           ...doc, 
           status:'processed'
-        })))
+        })))}
+        catch(error){
+          console.error(error)
+        }
+        finally{
+          setLoadingDocs(false)
+        }
     };
 
     useEffect(()=>{
@@ -40,7 +49,9 @@ export default function PrimaryDashBoard(){
       fetchDocument()
     }, [loading, session])
 
-    
+    if(loadingDocs){
+      return <ConnectingState />
+    }
     documents.map((doc)=>{
       storage += (doc.storage_used_mb)
     })
