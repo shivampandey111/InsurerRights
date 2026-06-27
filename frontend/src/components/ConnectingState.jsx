@@ -9,7 +9,7 @@ export default function ConnectingState() {
       </div>
 
       <h2 className="mt-8 text-[#EAEAEA] text-lg font-light tracking-wide">
-        Starting backend server...
+        Connecting to backend server...
       </h2>
 
       <p className="mt-3 max-w-md text-center text-[#666666] text-sm leading-7">
@@ -22,7 +22,7 @@ export default function ConnectingState() {
         <span className="h-2 w-2 rounded-full bg-[#E5E5E5] animate-pulse"></span>
 
         <span className="text-[11px] uppercase tracking-[0.18em] text-[#777777]">
-          Connecting...
+          Establishing Connection...
         </span>
       </div>
     </div>
