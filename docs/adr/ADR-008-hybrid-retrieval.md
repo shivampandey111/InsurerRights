@@ -241,4 +241,4 @@ rather than independent capabilities.
 - ADR-006: Dual Conversation Modes (Document Chat and Global Chat)
 - ADR-007: Insurance-Aware Chunking Strategy
 - ADR-009: Separation of Policy Knowledge and Insurance Knowledge
-- ADR-010: Category-Level Reasoning over Literal Term Matching
+- ADR-010: Context Aware Prompt Reasoning

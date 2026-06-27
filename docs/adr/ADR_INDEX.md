@@ -19,7 +19,7 @@ Architectural Decision Records (ADRs) capture the reasoning behind major technic
 | ADR-007 | Insurance-Aware Chunking Strategy | Accepted | Retrieval Architecture |
 | ADR-008 | Hybrid Retrieval Scope (Policy Documents and Regulatory Knowledge) | Accepted | Knowledge Architecture |
 | ADR-009 | Separation of Policy Knowledge and Insurance Domain Knowledge | Accepted | Knowledge Architecture |
-| ADR-010 | Category-Level Reasoning over Literal Term Matching | Accepted | AI Reasoning |
+| ADR-010 | Context Aware Prompt Reasoning | Accepted | AI Reasoning |
 | ADR-011 | Use Server-Sent Events (SSE) for Response Streaming | Accepted | Communication Architecture |
 | ADR-012 | Buffered SSE Parsing for Reliable Token Streaming | Accepted | Reliability Architecture |
 
