@@ -12,8 +12,13 @@ An AI-powered platform that gives Indian policyholders the same information adva
 
 ---
 
-![Demo](docs/Insurer%20Rights.mp4)
+## Demo
 
+![Demo](docs/demo.gif)
+
+📹 A video walkthrough demonstrating the application's features and workflow is available below.
+
+[Insurer Rights](https://www.loom.com/share/3961683f32a24010a0f96a101e6f5ee7)
 ---
 
 ## Overview
